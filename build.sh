@@ -60,17 +60,17 @@ check_root
 check_linux
 check_connection
 # System Dependencies
-exit
 apt update
-apt install python3-pip python3-dev build-essential libssl-dev libffi-dev python3-setuptools
- 
-python3 -m pip install virtualenv
+apt install python3-pip python3-dev build-essential libssl-dev libffi-dev python3-setuptools python3-venv
 
 # Python Dependencies
 python3 -m virtualenv venv
-python3_env="$PWD/venv/bin/python"
-pip3_env="$PWD/venv/bin/pip"
+. venv/bin/activate
 
-$pip3_env install -r requirements.txt
+pip3 install -r requirements.txt
 
+cp bidera.service /etc/systemd/system/
 
+systemctl start bidera
+
+#gunicorn --bind 0.0.0.0:5000 wsgi:app

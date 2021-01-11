@@ -1,5 +1,4 @@
 import calendar
-import requests
 
 from flask_appbuilder import ModelView
 from flask_appbuilder.charts.views import GroupByChartView

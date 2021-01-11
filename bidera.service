@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve bidera
+After=network.target
+
+[Service]
+User=bider
+Group=www-data
+WorkingDirectory=/home/bider/bidera
+Environment="PATH=/home/bider/bidera/venv/bin"
+ExecStart=/home/bider/bidera/bin/gunicorn --workers 3 --bind unix:bidera.sock -m 007 wsgi:app
+
+[Install]
+WantedBy=multi-user.target
