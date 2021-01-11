@@ -3,6 +3,8 @@ import logging
 from flask import Flask
 from flask_appbuilder import AppBuilder, SQLA
 
+
+
 """
  Logging configuration
 """
@@ -28,5 +30,10 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
 """
-
 from . import views, models
+from .devices.api import DevicesApi
+
+appbuilder.add_api(DevicesApi)
+
+
+

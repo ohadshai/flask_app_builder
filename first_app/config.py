@@ -108,3 +108,5 @@ IMG_UPLOAD_URL = "/static/uploads/"
 # APP_THEME = "spacelab.css"
 # APP_THEME = "united.css"
 # APP_THEME = "yeti.css"
+
+FAB_API_SWAGGER_UI = True

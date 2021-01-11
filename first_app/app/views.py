@@ -1,9 +1,11 @@
 import calendar
+import requests
 
 from flask_appbuilder import ModelView
 from flask_appbuilder.charts.views import GroupByChartView
 from flask_appbuilder.models.group import aggregate_count
 from flask_appbuilder.models.sqla.interface import SQLAInterface
+from flask_appbuilder.api import BaseApi, expose
 
 from . import appbuilder, db
 from .models import Contact, ContactGroup, Gender
@@ -141,3 +143,35 @@ appbuilder.add_view(
     icon="fa-dashboard",
     category="Contacts",
 )
+
+# class ExampleApi(BaseApi):
+#     @expose('/greeting/<lulu>')
+#     def greeting(self, lulu):
+#         """Send a greeting
+#         ---
+#         get:
+#           responses:
+#             200:
+#               description: Greet the user
+#               content:
+#                 application/json:
+#                   schema:
+#                     type: object
+#                     properties:
+#                       message:
+#                         type: string
+#         post:
+#           responses:
+#             201:
+#               description: Greet the user
+#               content:
+#                 application/json:
+#                   schema:
+#                     type: object
+#                     properties:
+#                       message:
+#                         type: string"""
+#         return self.response(200, message="Hello")
+#
+#
+# appbuilder.add_api(ExampleApi)
