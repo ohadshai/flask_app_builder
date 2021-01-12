@@ -1,12 +1,12 @@
 from flask import request
 
+
 from flask_appbuilder.api import BaseApi, expose
 
+class SecurityApi(BaseApi):
 
-class DevicesApi(BaseApi):
-
-    resource_name = "devices"
-    openapi_spec_tag = "Devices"
+    # resource_name = "jobs"
+    openapi_spec_tag = "Jobs"
 
     # def add_apispec_components(self, api_spec):
     #     super(SecurityApi, self).add_apispec_components(api_spec)
@@ -14,14 +14,13 @@ class DevicesApi(BaseApi):
     #     api_spec.components.security_scheme("jwt", jwt_scheme)
     #     api_spec.components.security_scheme("jwt_refresh", jwt_scheme)
 
-    @expose("/", methods=["POST"])
-    # @safe
-    def devices(self):
-        """Get all devices from DSM according to filter
+    @expose("/get_job_results/<job_id>", methods=["GET", "POST"])
+    def get_job_results(self, job_id=None):
+        """Get all job's results from ELK according to job_id (if exists) and filter jsob in body
         ---
         post:
           description: >-
-            Get all devices from DSM according to filter
+            Get all job's results from ELK according to job_id (if exists) and filter jsob in body
           requestBody:
             required: true
             content:
@@ -29,9 +28,9 @@ class DevicesApi(BaseApi):
                 schema:
                   type: object
                   properties:
-                    hardware:
-                      description: Hardware of device
-                      example: 11 Pro
+                    job_type:
+                      description: job type
+                      example: PE
                       type: string
                     software:
                       description: Software of device
@@ -72,3 +71,36 @@ class DevicesApi(BaseApi):
         resp = dict()
         return self.response(200, **resp)
 
+    @expose("/run_job", methods=["POST"])
+    def run_job(self):
+        """
+            Security endpoint for the refresh token, so we can obtain a new
+            token without forcing the user to login again
+        ---
+        post:
+          description: >-
+            Use the refresh token to get a new JWT access token
+          responses:
+            200:
+              description: Refresh Successful
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      access_token:
+                        description: A new refreshed access token
+                        type: string
+            401:
+              $ref: '#/components/responses/401'
+            500:
+              $ref: '#/components/responses/500'
+          security:
+            - jwt_refresh: []
+        """
+        resp = {
+            API_SECURITY_ACCESS_TOKEN_KEY: create_access_token(
+                identity=get_jwt_identity(), fresh=False
+            )
+        }
+        return self.response(200, **resp)
