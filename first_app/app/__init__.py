@@ -22,9 +22,6 @@ appbuilder = AppBuilder(app, db.session)
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
 
-#Only include this for SQLLite constraints
-@event.listens_for(Engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
     # Will force sqllite contraint foreign keys
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
@@ -32,8 +29,10 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 """
 from . import views, models
 from .devices.api import DevicesApi
+from .jobs.api import JobsApi
 
 appbuilder.add_api(DevicesApi)
+appbuilder.add_api(JobsApi)
 
 
 
