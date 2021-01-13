@@ -3,8 +3,8 @@ from flask import request
 
 from flask_appbuilder.api import BaseApi, expose
 
-class JobsApi(BaseApi):
 
+class JobsApi(BaseApi):
     resource_name = "jobs"
     openapi_spec_tag = "Jobs"
 
@@ -14,13 +14,13 @@ class JobsApi(BaseApi):
     #     api_spec.components.security_scheme("jwt", jwt_scheme)
     #     api_spec.components.security_scheme("jwt_refresh", jwt_scheme)
 
-    @expose("/get_summary/", methods=["GET"])
-    def get_jobs_summary(self):
-        """Get all job's results from SQL DB according to job_id (if exists) and filter json in body
+    @expose("/summary/", methods=["GET"])
+    def get_summary(self):
+        """Get all job's results from SQL DB according to filter json in body
         ---
         get:
           description: >-
-            Get all job's results from SQL DB according to job_id (if exists) and filter json in body
+            Get all job's results from SQL DB according to filter json in body
           requestBody:
             description: filter jobs json
             required: false
@@ -129,8 +129,52 @@ class JobsApi(BaseApi):
         resp = dict()
         return self.response(200, **resp)
 
-    @expose("/run_job", methods=["POST"])
-    def run_job(self):
+    @expose("/summary/<job_id>", methods=["POST"])
+    def update_summary(self, job_id):
+        """update specific job according to json
+        ---
+        post:
+          description: >-
+            update specific job according json
+          parameters:
+          - in: path
+            schema:
+              type: string
+            name: job_id
+          requestBody:
+            description: update job json
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      description: status of job
+                      example: running
+                      type: string
+                    devices:
+                      description: job's devices info
+                      type: json
+        responses:
+            200:
+              description: The OpenAPI spec
+              content:
+                application/json:
+                  schema:
+                    type: object
+            404:
+              $ref: '#/components/responses/404'
+            500:
+              $ref: '#/components/responses/500'
+        """
+        if not request.is_json:
+            return self.response_400(message="Request payload is not JSON")
+        resp = dict()
+        return self.response(200, **resp)
+
+    @expose("/run", methods=["POST"])
+    def run(self):
         """
             Run job with config json using Jenkins
         ---
@@ -211,6 +255,84 @@ class JobsApi(BaseApi):
                         description: reason in case of failure
                         type: string
                         example: "Jenkins is Down"
+            401:
+              $ref: '#/components/responses/401'
+            500:
+              $ref: '#/components/responses/500'
+          security:
+            - jwt_refresh: []
+        """
+        resp = {}
+        return self.response(200, **resp)
+
+    @expose("/cancel/<job_id>", methods=["POST"])
+    def cancel(self, job_id):
+        """
+            Cancel specific job by id
+        ---
+        post:
+          description: >-
+            Cancel specific job by id
+          parameters:
+          - in: path
+            schema:
+              type: string
+            name: job_id
+          responses:
+            200:
+              description: cancel success
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      result:
+                        description: result of cancel job
+                        type: string
+                        example: "failed"
+                      reason:
+                        description: reason in case of failure
+                        type: string
+                        example: "Jenkins is Down"
+            401:
+              $ref: '#/components/responses/401'
+            500:
+              $ref: '#/components/responses/500'
+          security:
+            - jwt_refresh: []
+        """
+        resp = {}
+        return self.response(200, **resp)
+
+    @expose("/download_artifact/<job_id>", methods=["GET"])
+    def download_artifact(self, job_id):
+        """
+            Download all artifacts of job by id
+        ---
+        get:
+          description: >-
+            Download all artifacts of job by id
+          parameters:
+          - in: path
+            schema:
+              type: string
+            name: job_id
+          responses:
+            200:
+              description: download success
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      result:
+                        description: result of cancel job
+                        type: string
+                        example: "failed"
+                      reason:
+                        description: reason in case of failure
+                        type: string
+                        example: "JFrog is Down"
             401:
               $ref: '#/components/responses/401'
             500:

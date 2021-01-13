@@ -47,11 +47,11 @@ check_linux(){
 }
 
 check_connection(){
-	wget -q --spider http://google.com
+	curl -s  http://google.com > /dev/null
 	if [ $? -eq 0 ]; then
 		success "Connected to Network"		
 	else
-    	failure "Connection to network failed. Check connection..."
+    failure "Connection to network failed. Check connection..."
 fi
 }
 
@@ -60,8 +60,8 @@ check_root
 check_linux
 check_connection
 # System Dependencies
-apt update
-apt install python3-pip python3-dev build-essential libssl-dev libffi-dev python3-setuptools python3-venv
+yum update -y
+yum install -y python3-pip python3-dev build-essential libssl-dev libffi-dev python3-setuptools python3-venv
 
 # Python Dependencies
 python3 -m virtualenv venv
