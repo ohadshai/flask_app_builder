@@ -14,8 +14,8 @@ class JobsApi(BaseApi):
     #     api_spec.components.security_scheme("jwt", jwt_scheme)
     #     api_spec.components.security_scheme("jwt_refresh", jwt_scheme)
 
-    @expose("/summary/", methods=["GET"])
-    def get_summary(self):
+    @expose("/results/summary/", methods=["GET"])
+    def results_summary(self):
         """Get all job's results from SQL DB according to filter json in body
         ---
         get:
@@ -129,7 +129,7 @@ class JobsApi(BaseApi):
         resp = dict()
         return self.response(200, **resp)
 
-    @expose("/summary/<job_id>", methods=["POST"])
+    @expose("/results/summary/<job_id>", methods=["POST"])
     def update_summary(self, job_id):
         """update specific job according to json
         ---
@@ -173,14 +173,150 @@ class JobsApi(BaseApi):
         resp = dict()
         return self.response(200, **resp)
 
+    @expose("/results/subjobs/", methods=["GET"])
+    def results_subjobs(self):
+        """Get all subjobs results from ELK according to filter json in body
+        ---
+        get:
+          description: >-
+            Get all job's results from SQL DB according to filter json in body
+          requestBody:
+            description: filter jobs json
+            required: false
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    job_id:
+                      description: Id of Job
+                      example: 6e4fd45a93e0
+                      type: string
+                    sub_job_id:
+                      description: Id of SubJob
+                      example: 564fdcdfe932
+                      type: string
+                    page:
+                      description: number of page (for pagination)
+                      example: 2
+                      type: integer
+                    page_block:
+                      description: number of rows per page (for pagination)
+                      example: 20
+                      type: integer
+                    job_type:
+                      description: job type
+                      example: PE
+                      type: string
+                      enum:
+                      - PE
+                      - RCE
+                      - DEV
+                      - QA
+                    status:
+                      description: status of job
+                      example: running
+                      type: string
+                      enum:
+                      - pending
+                      - running
+                      - passed
+                      - failed
+                      - cancelled
+                      - internal_error
+                    user:
+                      description: name of job's submitter
+                      example: john
+                      type: string
+                    date:
+                      description: datetime job was launched
+                      example: "2021-01-07 15:06:46"
+                      type: Datetime
+        responses:
+            200:
+              description: subjobs information
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      job_type:
+                        description: job type
+                        example: running
+                        type: string
+                      job_id:
+                        type: Id of job
+                        example: 6e4fd45a93e0
+                        type: string
+                      subjob_id:
+                        type: Id of Subjob
+                        example: 6e4fd45a93e0
+                        type: string
+                      user:
+                        description: name of job's submitter
+                        example: john
+                        type: string
+                      status:
+                        description: status of subjob
+                        example: running
+                        type: string
+                      date:
+                        description: datetime job was launched
+                        example: "2021-01-07 15:06:46"
+                        type: Datetime
+                      results:
+                        description: run_results of subjob
+                        type: object
+                        properties:
+                            number_test:
+                              description: number of run inside of subjob
+                              example: 2
+                              type: integer
+                            test_name:
+                              description: test name
+                              example: test_rce
+                              type: string
+                            status:
+                              description: status of run
+                              example: failed
+                              type: string
+                            error_reason:
+                              description: reason for error in test(if necessary)
+                              example: 
+                              type: string
+                            xxx_session_link:
+                              description: xxx session link for this run
+                              example: http://xxxx
+                              type: string
+                            xxx_result:
+                              description: xxx result for this run
+                              type: object
+                            crash_link:
+                              description: xxx crash link for this run (if exists)
+                              example: http://xxxx
+                              type: string
+                            console_log_link:
+                              description: xxx console log link for this run (if exists)
+                              example: http://xxxx
+                              type: string
+
+
+            400:
+              $ref: '#/components/responses/400'
+            401:
+              $ref: '#/components/responses/401'
+            500:
+              $ref: '#/components/responses/500'
+        """
+
     @expose("/run", methods=["POST"])
     def run(self):
         """
-            Run job with config json using Jenkins
+            Run job with config json through REST of Jenkins Create random job id
         ---
         post:
           description: >-
-            Run job with config json using Jenkins. Create random job id
+            Run job with config json through REST of Jenkins. Create random job id
           requestBody:
             description: job config - config of all subjobs
             required: true
@@ -268,11 +404,11 @@ class JobsApi(BaseApi):
     @expose("/cancel/<job_id>", methods=["POST"])
     def cancel(self, job_id):
         """
-            Cancel specific job by id
+            Cancel specific job by id through REST of Jenkins
         ---
         post:
           description: >-
-            Cancel specific job by id
+            Cancel specific job by id through REST of Jenkins
           parameters:
           - in: path
             schema:
@@ -304,14 +440,14 @@ class JobsApi(BaseApi):
         resp = {}
         return self.response(200, **resp)
 
-    @expose("/download_artifact/<job_id>", methods=["GET"])
-    def download_artifact(self, job_id):
+    @expose("/download_artifacts/<job_id>", methods=["GET"])
+    def download_artifacts(self, job_id):
         """
-            Download all artifacts of job by id
+            Download all artifacts of job by id from JFrog
         ---
         get:
           description: >-
-            Download all artifacts of job by id
+            Download all artifacts of job by id from JFrog
           parameters:
           - in: path
             schema:
@@ -342,3 +478,5 @@ class JobsApi(BaseApi):
         """
         resp = {}
         return self.response(200, **resp)
+
+
