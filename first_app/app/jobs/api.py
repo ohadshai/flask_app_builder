@@ -395,8 +395,6 @@ class JobsApi(BaseApi):
               $ref: '#/components/responses/401'
             500:
               $ref: '#/components/responses/500'
-          security:
-            - jwt_refresh: []
         """
         resp = {}
         return self.response(200, **resp)
@@ -462,7 +460,7 @@ class JobsApi(BaseApi):
                     type: object
                     properties:
                       result:
-                        description: result of cancel job
+                        description: result of downlood artifact
                         type: string
                         example: "failed"
                       reason:
@@ -473,8 +471,6 @@ class JobsApi(BaseApi):
               $ref: '#/components/responses/401'
             500:
               $ref: '#/components/responses/500'
-          security:
-            - jwt_refresh: []
         """
         resp = {}
         return self.response(200, **resp)
