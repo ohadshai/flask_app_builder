@@ -33,6 +33,17 @@ success_bold(){
     	echo -e "${bold}${green}${msg}${end}"
 }
 
+check_exit_code(){
+  exit_code=$?
+  err_msg=$1
+  success_msg=$2
+  if [[ $exit_code -ne 0 ]]; then
+    failure $err_msg
+  elif [[ ! -z $success_msg ]]; then
+    success $success_msg
+  fi
+}
+
 check_root(){
    	if [[ $EUID -ne 0 ]]; then
       		failure "This script must be run as root"
@@ -48,29 +59,53 @@ check_linux(){
 
 check_connection(){
 	curl -s  http://google.com > /dev/null
-	if [ $? -eq 0 ]; then
-		success "Connected to Network"		
-	else
-    failure "Connection to network failed. Check connection..."
-fi
+	check_exit_code "Connection to network failed. Check connection..." "Connected to Network"
 }
 
+install_yum_packages(){
+  print_info "Updating yum.."
+  yum update -y > /dev/null
+  check_exit_code "yum update failed" "yum update finished successfully"
+  print_info "Install yum packages"
+  yum -y groupinstall "Development Tools"
+  yum -y install openssl-devel bzip2-devel libffi-devel wget
+}
+
+install_python3(){
+  print_info "Installing Python3.8"
+  mkdir downloads
+  wget https://www.python.org/ftp/python/3.8.7/Python-3.8.7.tgz -P downloads
+  tar xvf downloads/Python-3.8.7.tgz -C downloads
+  pushd downloads/Python-3.8.7 > /dev/null
+  ./configure --enable-optimizations
+  make altinstall
+  popd > /dev/null
+  ln -s /usr/local/bin/python3.8 /usr/local/bin/python3
+  ln -s /usr/local/bin/pip3.8 /usr/local/bin/pip3
+  sed -i -e '/secure_path/ s[=.*[&:/usr/local/bin[' /etc/sudoers
+  python3 --version
+  check_exit_code "python3 failed to install" "python3 installed successfully"
+  pip3 --version
+  check_exit_code "pip3 failed to install" "pip3 installed successfully"
+  pip3 install virtualenv
+  check_exit_code "virtualenv failed to install" "virtualenv installed successfully"
+}
+
+create_virtualenv(){
+  python3 -m virtualenv venv
+  . venv/bin/activate
+  pip3 install -r requirements.txt
+}
 
 check_root
 check_linux
 check_connection
-# System Dependencies
-yum update -y
-yum install -y python3-pip python3-dev build-essential libssl-dev libffi-dev python3-setuptools python3-venv
-
-# Python Dependencies
-python3 -m virtualenv venv
-. venv/bin/activate
-
-pip3 install -r requirements.txt
+install_yum_packages
+install_python3
+create_virtualenv
 
 cp bidera.service /etc/systemd/system/
-
+print_info "starting Bidera Service"
 systemctl start bidera
 
 #gunicorn --bind 0.0.0.0:5000 wsgi:app

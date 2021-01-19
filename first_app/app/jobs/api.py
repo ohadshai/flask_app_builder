@@ -131,7 +131,7 @@ class JobsApi(BaseApi):
 
     @expose("/results/summary/<job_id>", methods=["POST"])
     def update_summary(self, job_id):
-        """update specific job according to json
+        """update specific job in SQL DB according to json
         ---
         post:
           description: >-
@@ -156,17 +156,22 @@ class JobsApi(BaseApi):
                     devices:
                       description: job's devices info
                       type: json
-        responses:
-            200:
-              description: The OpenAPI spec
-              content:
-                application/json:
-                  schema:
-                    type: object
-            404:
-              $ref: '#/components/responses/404'
-            500:
-              $ref: '#/components/responses/500'
+          responses:
+              200:
+                description: Update job success
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                      properties:
+                        message:
+                          description: success message of update job
+                          type: string
+                          example: "Update job was successful"
+              404:
+                $ref: '#/components/responses/404'
+              500:
+                $ref: '#/components/responses/500'
         """
         if not request.is_json:
             return self.response_400(message="Request payload is not JSON")
@@ -179,7 +184,7 @@ class JobsApi(BaseApi):
         ---
         get:
           description: >-
-            Get all job's results from SQL DB according to filter json in body
+            Get all job's results from ELK according to filter json in body
           requestBody:
             description: filter jobs json
             required: false
@@ -232,42 +237,42 @@ class JobsApi(BaseApi):
                       description: datetime job was launched
                       example: "2021-01-07 15:06:46"
                       type: Datetime
-        responses:
-            200:
-              description: subjobs information
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      job_type:
-                        description: job type
-                        example: running
-                        type: string
-                      job_id:
-                        type: Id of job
-                        example: 6e4fd45a93e0
-                        type: string
-                      subjob_id:
-                        type: Id of Subjob
-                        example: 6e4fd45a93e0
-                        type: string
-                      user:
-                        description: name of job's submitter
-                        example: john
-                        type: string
-                      status:
-                        description: status of subjob
-                        example: running
-                        type: string
-                      date:
-                        description: datetime job was launched
-                        example: "2021-01-07 15:06:46"
-                        type: Datetime
-                      results:
-                        description: run_results of subjob
-                        type: object
-                        properties:
+          responses:
+              200:
+                description: subjobs information
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                      properties:
+                        job_type:
+                          description: job type
+                          example: running
+                          type: string
+                        job_id:
+                          description: Id of job
+                          example: 6e4fd45a93e0
+                          type: string
+                        subjob_id:
+                          description: Id of Subjob
+                          example: 6e4fd45a93e0
+                          type: string
+                        user:
+                          description: name of job's submitter
+                          example: john
+                          type: string
+                        status:
+                          description: status of subjob
+                          example: running
+                          type: string
+                        date:
+                          description: datetime job was launched
+                          example: "2021-01-07 15:06:46"
+                          type: Datetime
+                        results:
+                          description: run_results of subjob
+                          type: object
+                          properties:
                             number_test:
                               description: number of run inside of subjob
                               example: 2
@@ -282,7 +287,7 @@ class JobsApi(BaseApi):
                               type: string
                             error_reason:
                               description: reason for error in test(if necessary)
-                              example: 
+                              example:
                               type: string
                             xxx_session_link:
                               description: xxx session link for this run
@@ -301,12 +306,12 @@ class JobsApi(BaseApi):
                               type: string
 
 
-            400:
-              $ref: '#/components/responses/400'
-            401:
-              $ref: '#/components/responses/401'
-            500:
-              $ref: '#/components/responses/500'
+              400:
+                $ref: '#/components/responses/400'
+              401:
+                $ref: '#/components/responses/401'
+              500:
+                $ref: '#/components/responses/500'
         """
 
     @expose("/run", methods=["POST"])
@@ -383,14 +388,10 @@ class JobsApi(BaseApi):
                   schema:
                     type: object
                     properties:
-                      result:
-                        description: result of run job
+                      message:
+                        description: success message
                         type: string
-                        example: "failed"
-                      reason:
-                        description: reason in case of failure
-                        type: string
-                        example: "Jenkins is Down"
+                        example: "Run submittion ended successfully"
             401:
               $ref: '#/components/responses/401'
             500:
@@ -420,14 +421,10 @@ class JobsApi(BaseApi):
                   schema:
                     type: object
                     properties:
-                      result:
-                        description: result of cancel job
+                      message:
+                        description: success message of cancel job
                         type: string
-                        example: "failed"
-                      reason:
-                        description: reason in case of failure
-                        type: string
-                        example: "Jenkins is Down"
+                        example: "Cancel Job succeeded"
             401:
               $ref: '#/components/responses/401'
             500:
@@ -460,13 +457,9 @@ class JobsApi(BaseApi):
                     type: object
                     properties:
                       result:
-                        description: result of downlood artifact
+                        description: message success of download artifact
                         type: string
-                        example: "failed"
-                      reason:
-                        description: reason in case of failure
-                        type: string
-                        example: "JFrog is Down"
+                        example: "Download artifact ended successfully"
             401:
               $ref: '#/components/responses/401'
             500:

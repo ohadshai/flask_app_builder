@@ -8,18 +8,12 @@ class DevicesApi(BaseApi):
     resource_name = "devices"
     openapi_spec_tag = "Devices"
 
-    # def add_apispec_components(self, api_spec):
-    #     super(SecurityApi, self).add_apispec_components(api_spec)
-    #     jwt_scheme = {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
-    #     api_spec.components.security_scheme("jwt", jwt_scheme)
-    #     api_spec.components.security_scheme("jwt_refresh", jwt_scheme)
-
-    @expose("/", methods=["POST"])
+    @expose("/", methods=["GET"])
     # @safe
     def devices(self):
         """Get all devices from DSM according to filter
         ---
-        post:
+        get:
           description: >-
             Get all devices from DSM according to filter
           requestBody:
@@ -29,26 +23,51 @@ class DevicesApi(BaseApi):
                 schema:
                   type: object
                   properties:
-                    hardware:
-                      description: Hardware of device
-                      example: 11 Pro
-                      type: string
-                    software:
-                      description: Software of device
-                      example: 14.1
-                      type: string
-                    udid:
-                      description: Udid of device
-                      example: 03b2e7e071054cf1a82e03aaa8b141b7
-                      type: string
-                    pac:
-                      description: device hardware preference - X and above
-                      example: true
-                      type: boolean
-                    "[device_info]":
-                      description: device attributes
-                      example: DeviceName=IPhone
-                      type: string
+                    num_devices:
+                      description: Number of devices
+                      example: 3
+                      type: integer
+                    filter:
+                      description: filter of devices
+                      type: object
+                      properties:
+                        hardware:
+                          description: hardware filter object
+                          type: object
+                          properties:
+                            value:
+                              description: value/range of hardware
+                              type: string/list
+                              example: [XSMax,12]
+                            logic:
+                              description: logic of filter
+                              type: string
+                              example: range
+                        software:
+                          description: software filter object
+                          type: object
+                          properties:
+                            value:
+                              description: value/range of hardware
+                              type: float/list
+                              example: 14.1
+                            logic:
+                              description: logic of filter
+                              type: string
+                              example: exclude
+                        pac:
+                          description: hardware >= X
+                          type: boolean
+                          example: true
+                        host:
+                          description: host of device
+                          type: string
+                          example: 2.2.2.2
+                        device_info_attribute:
+                          description: any device attribute
+                          type: string
+                          example: iPhone8plus (DeviceName attribute)
+
           responses:
             200:
               description: all devices that qualify the filter the user sent
@@ -57,8 +76,22 @@ class DevicesApi(BaseApi):
                   schema:
                     type: object
                     properties:
-                      udid/hardware-software:
-                        type: json
+                      hardware:
+                        description: hardware of device
+                        type: string
+                        example: XSMax
+                      software:
+                        description: software of device
+                        type: string
+                        example: 14.1
+                      host:
+                        description: host of device
+                        type: string
+                        example: 2.2.2.2
+                      device_info_attribute:
+                        description: any device attribute
+                        type: string
+                        example: iPhone8plus (DeviceName attribute)
 
             400:
               $ref: '#/components/responses/400'
