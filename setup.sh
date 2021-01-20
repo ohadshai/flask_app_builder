@@ -12,6 +12,12 @@ end='\e[0m'
 crossmark="${red}\u2718${end}"
 checkmark="${green}\u2714${end}"
 
+
+print_pink(){
+    msg=$1
+    echo -e "${bold}${cyn}${msg}${end}"
+}
+
 print_info(){
     	msg=$1
     	echo -e "${bold}${msg}${end}"
@@ -38,9 +44,9 @@ check_exit_code(){
   err_msg=$1
   success_msg=$2
   if [[ $exit_code -ne 0 ]]; then
-    failure $err_msg
+    failure "$err_msg"
   elif [[ ! -z $success_msg ]]; then
-    success $success_msg
+    success "$success_msg"
   fi
 }
 
@@ -55,6 +61,14 @@ check_linux(){
 	if [ $os != "Linux" ]; then 
 		failure "This script can run only on Linux system"
 	fi 	
+}
+
+host_info(){
+  host_info=$(hostnamectl)
+  print_info "-------------------    Host Info    ------------------------"
+  print_pink "$host_info"
+  print_info "------------------------------------------------------------"
+  print_info "Starting Installation..."
 }
 
 check_connection(){
@@ -83,6 +97,7 @@ install_python3(){
   ln -s /usr/local/bin/python3.8 /usr/local/bin/python3
   ln -s /usr/local/bin/pip3.8 /usr/local/bin/pip3
   sed -i -e '/secure_path/ s[=.*[&:/usr/local/bin[' /etc/sudoers
+  ## ERROR HERE. doesn't reload changes in sudoers
   python3 --version
   check_exit_code "python3 failed to install" "python3 installed successfully"
   pip3 --version
@@ -97,15 +112,23 @@ create_virtualenv(){
   pip3 install -r requirements.txt
 }
 
-check_root
-check_linux
-check_connection
-install_yum_packages
-install_python3
-create_virtualenv
 
-cp bidera.service /etc/systemd/system/
-print_info "starting Bidera Service"
-systemctl start bidera
+
+main(){
+  check_root
+  check_linux
+  host_info
+  check_connection
+  install_yum_packages
+  install_python3
+  create_virtualenv
+
+  cp bidera.service /etc/systemd/system/
+  print_info "starting Bidera Service"
+  systemctl start bidera
+}
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
 
 #gunicorn --bind 0.0.0.0:5000 wsgi:app
