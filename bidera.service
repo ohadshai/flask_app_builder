@@ -3,11 +3,12 @@ Description=Gunicorn instance to serve bidera
 After=network.target
 
 [Service]
-User=bider
+Type=forking
+User=centos
 Group=www-data
-WorkingDirectory=/home/bider/bidera
-Environment="PATH=/home/bider/bidera/venv/bin"
-ExecStart=/home/bider/bidera/bin/gunicorn --workers 3 --bind unix:bidera.sock -m 007 wsgi:app
+WorkingDirectory=/home/centos/dev/flask_app_builder
+Environment="PATH=/home/centos/dev/flask_app_builder/venv/bin"
+ExecStart=/home/centos/dev/flask_app_builder/venv/bin/gunicorn --workers 3 --bind unix:bidera.sock -m 007 wsgi:app
 
 [Install]
 WantedBy=multi-user.target
